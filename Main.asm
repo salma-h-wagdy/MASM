@@ -1,27 +1,29 @@
-.386
-.model flat, stdcall
-.stack 4096
+extrn ExitProcess: PROC
+extrn WriteConsoleA: PROC
+extrn GetStdHandle: PROC
 
-ExitProcess PROTO, dwExitCode:DWORD
-WriteConsoleA PROTO, hConsoleOutput:DWORD, lpBuffer:PTR BYTE, nNumberOfCharsToWrite:DWORD, lpNumberOfCharsWritten:PTR DWORD, lpReserved:DWORD
-GetStdHandle PROTO, nStdHandle:DWORD
-STD_OUTPUT_HANDLE EQU -11
 
 .data
-
-welcome db 0dh,0ah ,"Welcome to this simple calculator written in assembly :D",0dh , 0ah ,0
+welcome db 0dh, 0ah, "Welcome to this simple calculator written in assembly :D", 0dh, 0ah, 0
 welcome_length equ $ - welcome
-written DWORD ?
+written dq ?
 
 .code
 main PROC
+    sub rsp, 28h
+    mov ecx, -11
+    call GetStdHandle
+    mov rbx, rax
 
-INVOKE GetStdHandle, STD_OUTPUT_HANDLE
-    mov ebx, eax
+    lea rcx, [rbx]
+    lea rdx, [welcome]
+    mov r8d, welcome_length
+    lea r9, [written]
+    mov qword ptr [rsp+20h], 0
+    call WriteConsoleA
 
-INVOKE WriteConsoleA, ebx, ADDR welcome, welcome_length, ADDR written, 0
-
-  INVOKE ExitProcess, eax
+    xor ecx, ecx
+    call ExitProcess
 main ENDP
 
-END main        
+END
